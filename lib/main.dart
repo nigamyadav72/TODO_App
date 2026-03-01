@@ -3,12 +3,13 @@ import 'package:provider/provider.dart';
 import 'core/themes/app_theme.dart';
 import 'views/onboarding/onboarding_screen.dart';
 
+import 'services/task_provider.dart';
+
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        // Add providers here as we implement services
-        ChangeNotifierProvider(create: (_) => AppState()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
       ],
       child: const MyApp(),
     ),
