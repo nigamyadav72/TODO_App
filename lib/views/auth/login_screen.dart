@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/colors.dart';
-import '../home/home_screen.dart';
-import '../../services/api_service.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    bool success = await ApiService.login(
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    bool success = await authProvider.login(
       _emailController.text,
       _passwordController.text,
     );
@@ -34,10 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success) {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      // No need to navigate manually, AuthWrapper will switch to HomeScreen
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

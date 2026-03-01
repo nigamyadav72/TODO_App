@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
+import '../../services/task_provider.dart';
 import 'add_task_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key});
+  final bool isNested;
+  const TaskListScreen({super.key, this.isNested = false});
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
@@ -25,6 +29,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget taskContent = Column(
+      children: [
+        if (widget.isNested) ...[
+          const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Today\'s Tasks',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+        const SizedBox(height: 10),
+        _buildDateSelector(),
+        const SizedBox(height: 30),
+        _buildFilterChips(),
+        const SizedBox(height: 24),
+        Expanded(child: _buildTasksList()),
+      ],
+    );
+
+    if (widget.isNested) {
+      return taskContent;
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -40,21 +73,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ],
       ),
-      body: DecorativeBackground(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            _buildDateSelector(),
-            const SizedBox(height: 30),
-            _buildFilterChips(),
-            const SizedBox(height: 24),
-            Expanded(child: _buildTasksList()),
-          ],
-        ),
-      ),
+      body: DecorativeBackground(child: taskContent),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-           Navigator.push(
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddTaskScreen()),
           );
@@ -162,39 +184,70 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Widget _buildTasksList() {
-    return ListView(
+    final taskProvider = Provider.of<TaskProvider>(context);
+    final allTasks = taskProvider.tasks;
+
+    // Mapping filter name to status in model
+    String? targetStatus;
+    if (_selectedFilter == 'To do') {
+      targetStatus = 'To-do';
+    } else if (_selectedFilter == 'In Progress') {
+      targetStatus = 'In Progress';
+    } else if (_selectedFilter == 'Complete') {
+      targetStatus = 'Done';
+    }
+
+    final filteredTasks = allTasks.where((task) {
+      bool matchesStatus = targetStatus == null || task.status == targetStatus;
+      // In a real app, you'd also check task.startTime against the selected date in _dates[_selectedDateIndex]
+      // For now, we'll just filter by status to make the tabs functional
+      return matchesStatus;
+    }).toList();
+
+    if (taskProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (filteredTasks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.task_alt, size: 64, color: AppColors.textSecondary.withOpacity(0.2)),
+            const SizedBox(height: 16),
+            Text('No tasks found for this filter', style: TextStyle(color: AppColors.textSecondary)),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      children: [
-        _buildTaskItem(
-          'Grocery shopping app design',
-          'Market Research',
-          '10:00 AM',
-          'Done',
-          AppColors.workTask,
-        ),
-        _buildTaskItem(
-          'Grocery shopping app design',
-          'Competitive Analysis',
-          '12:00 PM',
-          'In Progress',
-          AppColors.workTask,
-        ),
-        _buildTaskItem(
-          'Uber Eats redesign challenge',
-          'Create Low-fidelity Wireframe',
-          '07:00 PM',
-          'To-do',
-          AppColors.personalTask,
-        ),
-        _buildTaskItem(
-          'About design sprint',
-          'How to pitch a Design Sprint',
-          '09:00 PM',
-          'To-do',
-          AppColors.studyTask,
-        ),
-      ],
+      itemCount: filteredTasks.length,
+      itemBuilder: (context, index) {
+        final task = filteredTasks[index];
+        return _buildTaskItem(
+          task.category, // Assuming category corresponds to project label
+          task.title,
+          DateFormat('hh:mm a').format(task.startTime),
+          task.status,
+          _getCategoryColor(task.category),
+        );
+      },
     );
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Work':
+        return AppColors.workTask;
+      case 'Personal':
+        return AppColors.personalTask;
+      case 'Daily Study':
+        return AppColors.studyTask;
+      default:
+        return Colors.purple;
+    }
   }
 
   Widget _buildTaskItem(String project, String task, String time, String status, Color color) {
@@ -278,18 +331,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Container(
       height: 90,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomBarBackground,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(40),
           topRight: Radius.circular(40),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
       ),
       child: BottomAppBar(
         color: Colors.transparent,

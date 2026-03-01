@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
+import '../../services/task_provider.dart';
+import '../../services/auth_provider.dart';
 import '../tasks/task_list_screen.dart';
+import '../tasks/add_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,42 +19,72 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskProvider>(context, listen: false).fetchTasks();
+    });
+  }
+  @override
   Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: DecorativeBackground(
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildHeader(),
-                const SizedBox(height: 30),
-                _buildTodayTaskCard(),
-                const SizedBox(height: 30),
-                _buildSectionHeader('In Progress', onSeeAll: () {}),
-                const SizedBox(height: 16),
-                _buildInProgressList(),
-                const SizedBox(height: 30),
-                _buildSectionHeader('Task Groups', count: 4),
-                const SizedBox(height: 16),
-                _buildTaskGroupsList(),
-                const SizedBox(height: 110),
-              ],
-            ),
+          child: IndexedStack(
+            index: _currentIndex, // Limit for now if placeholder
+            children: [
+              _buildDashboard(taskProvider),
+              const TaskListScreen(isNested: true),
+              const Center(child: Text('Projects View', style: TextStyle(fontSize: 20))),
+              const Center(child: Text('Groups View', style: TextStyle(fontSize: 20))),
+            ],
           ),
         ),
       ),
       bottomNavigationBar: _buildBottomNav(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+          );
+        },
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildDashboard(TaskProvider taskProvider) {
+    return RefreshIndicator(
+      onRefresh: () => taskProvider.fetchTasks(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            _buildHeader(),
+            const SizedBox(height: 30),
+            _buildTodayTaskCard(),
+            const SizedBox(height: 30),
+            _buildSectionHeader('In Progress', onSeeAll: () {}),
+            const SizedBox(height: 16),
+            _buildInProgressList(),
+            const SizedBox(height: 30),
+            _buildSectionHeader('Task Groups', count: 4),
+            const SizedBox(height: 16),
+            _buildTaskGroupsList(),
+            const SizedBox(height: 110),
+          ],
+        ),
+      ),
     );
   }
 
@@ -76,6 +110,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 24),
+          onPressed: () => Provider.of<AuthProvider>(context, listen: false).logout(),
+        ),
         Stack(
           children: [
             IconButton(
@@ -131,10 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const TaskListScreen()),
-                    );
+                    setState(() => _currentIndex = 1);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -335,18 +370,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       height: 90,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomBarBackground,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(40),
           topRight: Radius.circular(40),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
       ),
       child: BottomAppBar(
         color: Colors.transparent,

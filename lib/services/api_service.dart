@@ -1,10 +1,18 @@
+import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:8000/api'; // Use 10.0.2.2 for Android Emulator, 127.0.0.1 for iOS Simulator
+  static String get baseUrl {
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:8000/api';
+    } else {
+      return 'http://127.0.0.1:8000/api';
+    }
+  }
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -24,9 +32,13 @@ class ApiService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', data['token']);
         return true;
+      } else {
+        debugPrint('Login failed with status: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
+        return false;
       }
-      return false;
     } catch (e) {
+      debugPrint('Login exception: $e');
       return false;
     }
   }
@@ -68,5 +80,9 @@ class ApiService {
     } catch (e) {
       return false;
     }
+  }
+  static Future<bool> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    return await prefs.remove('auth_token');
   }
 }
