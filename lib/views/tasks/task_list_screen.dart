@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/colors.dart';
+import '../../widgets/decorative_background.dart';
 import 'add_task_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
@@ -25,28 +26,31 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Today\'s Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Today\'s Tasks', style: TextStyle(fontWeight: FontWeight.w800)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
+            icon: const Icon(Icons.notifications_none_rounded, size: 28),
             onPressed: () {},
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          _buildDateSelector(),
-          const SizedBox(height: 24),
-          _buildFilterChips(),
-          const SizedBox(height: 24),
-          Expanded(child: _buildTasksList()),
-        ],
+      body: DecorativeBackground(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            _buildDateSelector(),
+            const SizedBox(height: 30),
+            _buildFilterChips(),
+            const SizedBox(height: 24),
+            Expanded(child: _buildTasksList()),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -270,30 +274,46 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
-   Widget _buildBottomNav() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: SizedBox(
-        height: 60,
+  Widget _buildBottomNav() {
+    return Container(
+      height: 90,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(40),
+          topRight: Radius.circular(40),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: BottomAppBar(
+        color: Colors.transparent,
+        elevation: 0,
+        notchMargin: 12,
+        shape: const CircularNotchedRectangle(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: const Icon(Icons.home_filled, color: AppColors.textSecondary),
+              icon: const Icon(Icons.home_filled, size: 28, color: AppColors.textSecondary),
               onPressed: () => Navigator.pop(context),
             ),
             IconButton(
-              icon: const Icon(Icons.calendar_month_outlined, color: AppColors.primary),
+              icon: const Icon(Icons.calendar_month_rounded, size: 28, color: AppColors.primary),
               onPressed: () {},
             ),
-            const SizedBox(width: 40),
+            const SizedBox(width: 48),
             IconButton(
-              icon: const Icon(Icons.insert_drive_file_outlined, color: AppColors.textSecondary),
+              icon: const Icon(Icons.insert_drive_file_rounded, size: 28, color: AppColors.textSecondary),
               onPressed: () {},
             ),
             IconButton(
-              icon: const Icon(Icons.group_outlined, color: AppColors.textSecondary),
+              icon: const Icon(Icons.group_rounded, size: 28, color: AppColors.textSecondary),
               onPressed: () {},
             ),
           ],

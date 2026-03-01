@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/colors.dart';
+import '../../widgets/decorative_background.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -18,30 +19,32 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Add Project', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Add Project', style: TextStyle(fontWeight: FontWeight.w800)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
+            icon: const Icon(Icons.notifications_none_rounded, size: 28),
             onPressed: () {},
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDropdownField(
-              'Task Group',
-              _selectedGroup,
-              ['Work', 'Personal', 'Daily Study', 'Household'],
-              (val) => setState(() => _selectedGroup = val!),
-            ),
+      body: DecorativeBackground(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDropdownField(
+                'Task Group',
+                _selectedGroup,
+                ['Work', 'Personal', 'Daily Study', 'Household'],
+                (val) => setState(() => _selectedGroup = val!),
+              ),
             const SizedBox(height: 24),
             _buildTextField('Project Name', _nameController, hint: 'Enter project name'),
             const SizedBox(height: 24),
@@ -65,18 +68,38 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             const SizedBox(height: 32),
             _buildLogoSelector(),
             const SizedBox(height: 48),
-            ElevatedButton(
-              onPressed: () {
-                // Return to previous screen
-                Navigator.pop(context);
-              },
-              child: const Text('Add Project'),
+            Container(
+              width: double.infinity,
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text('Add Project', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildDropdownField(String label, String value, List<String> items, Function(String?) onChanged) {
     return Column(

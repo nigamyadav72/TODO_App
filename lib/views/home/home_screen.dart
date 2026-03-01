@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import '../../core/constants/colors.dart';
+import '../../widgets/decorative_background.dart';
 import '../tasks/task_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,31 +17,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              // Header
-              _buildHeader(),
-              const SizedBox(height: 30),
-              // Today's Task Card
-              _buildTodayTaskCard(),
-              const SizedBox(height: 30),
-              // In Progress Section
-              _buildSectionHeader('In Progress', onSeeAll: () {}),
-              const SizedBox(height: 16),
-              _buildInProgressList(),
-              const SizedBox(height: 30),
-              // Task Groups Section
-              _buildSectionHeader('Task Groups', count: 4),
-              const SizedBox(height: 16),
-              _buildTaskGroupsList(),
-              const SizedBox(height: 100), // Space for bottom nav
-            ],
+      backgroundColor: Colors.white,
+      body: DecorativeBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                _buildHeader(),
+                const SizedBox(height: 30),
+                _buildTodayTaskCard(),
+                const SizedBox(height: 30),
+                _buildSectionHeader('In Progress', onSeeAll: () {}),
+                const SizedBox(height: 16),
+                _buildInProgressList(),
+                const SizedBox(height: 30),
+                _buildSectionHeader('Task Groups', count: 4),
+                const SizedBox(height: 16),
+                _buildTaskGroupsList(),
+                const SizedBox(height: 110),
+              ],
+            ),
           ),
         ),
       ),
@@ -333,34 +332,50 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: SizedBox(
-        height: 60,
+    return Container(
+      height: 90,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(40),
+          topRight: Radius.circular(40),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: BottomAppBar(
+        color: Colors.transparent,
+        elevation: 0,
+        notchMargin: 12,
+        shape: const CircularNotchedRectangle(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
-              icon: Icon(Icons.home_filled, color: _currentIndex == 0 ? AppColors.primary : AppColors.textSecondary),
-              onPressed: () => setState(() => _currentIndex = 0),
-            ),
-            IconButton(
-              icon: Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? AppColors.primary : AppColors.textSecondary),
-              onPressed: () => setState(() => _currentIndex = 1),
-            ),
-            const SizedBox(width: 40), // Space for FAB
-            IconButton(
-              icon: Icon(Icons.insert_drive_file_outlined, color: _currentIndex == 2 ? AppColors.primary : AppColors.textSecondary),
-              onPressed: () => setState(() => _currentIndex = 2),
-            ),
-            IconButton(
-              icon: Icon(Icons.group_outlined, color: _currentIndex == 3 ? AppColors.primary : AppColors.textSecondary),
-              onPressed: () => setState(() => _currentIndex = 3),
-            ),
+            _buildNavIcon(Icons.home_filled, 0),
+            _buildNavIcon(Icons.calendar_month_rounded, 1),
+            const SizedBox(width: 48),
+            _buildNavIcon(Icons.insert_drive_file_rounded, 2),
+            _buildNavIcon(Icons.group_rounded, 3),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNavIcon(IconData icon, int index) {
+    bool isSelected = _currentIndex == index;
+    return IconButton(
+      icon: Icon(
+        icon,
+        size: 28,
+        color: isSelected ? AppColors.primary : AppColors.textSecondary.withOpacity(0.5),
+      ),
+      onPressed: () => setState(() => _currentIndex = index),
     );
   }
 }

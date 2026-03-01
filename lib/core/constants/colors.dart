@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF6C5CE7);
-  static const Color primaryLight = Color(0xFFA29BFE);
-  static const Color accent = Color(0xFF00CEC9);
+  static const Color primary = Color(0xFF5E5CE6);
+  static const Color accent = Color(0xFF00D2FF);
   
-  static const Color background = Color(0xFFF9FAFD);
+  static const Color background = Color(0xFFFFFFFF);
   static const Color surface = Colors.white;
   
-  static const Color textPrimary = Color(0xFF2D3436);
-  static const Color textSecondary = Color(0xFF636E72);
+  static const Color textPrimary = Color(0xFF1E1E1E);
+  static const Color textSecondary = Color(0xFF8E8E93);
   
-  static const Color workTask = Color(0xFFFD79A8);
-  static const Color personalTask = Color(0xFF55E6C1);
-  static const Color studyTask = Color(0xFFFAB1A0);
+  static const Color workTask = Color(0xFFFF7BAC);
+  static const Color personalTask = Color(0xFF5AC8FA);
+  static const Color studyTask = Color(0xFFFFCC00);
   
-  static const Color success = Color(0xFF00B894);
-  static const Color warning = Color(0xFFFDCB6E);
-  static const Color error = Color(0xFFD63031);
+  static const Color success = Color(0xFF34C759);
+  static const Color warning = Color(0xFFFF9500);
+  static const Color error = Color(0xFFFF3B30);
+  
+  // Decorative blur colors
+  static const Color blurYellow = Color(0xFFFFF7CC);
+  static const Color blurBlue = Color(0xFFE6F7FF);
+  static const Color blurPink = Color(0xFFFFF0F5);
+  static const Color blurGreen = Color(0xFFF6FFED);
   
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryLight],
+    colors: [Color(0xFF8E8DFF), Color(0xFF5E5CE6)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

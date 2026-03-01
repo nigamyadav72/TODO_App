@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.10.67:8000/api'; // Standard testing IP or your backend URL
+  static const String baseUrl = 'http://127.0.0.1:8000/api'; // Use 10.0.2.2 for Android Emulator, 127.0.0.1 for iOS Simulator
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();

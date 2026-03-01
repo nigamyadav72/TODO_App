@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/colors.dart';
+import '../../widgets/decorative_background.dart';
 import '../auth/login_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -8,75 +9,104 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              AppColors.primaryLight.withOpacity(0.1),
-              AppColors.primary.withOpacity(0.05),
-            ],
-          ),
-        ),
+      body: DecorativeBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               children: [
-                const Spacer(),
-                // Illustration Placeholder
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage('https://ouch-cdn2.icons8.com/6n-nUq_U_Z0v3zH_N5C5S3O_Z3L_z_D5_e_f_g_h_i_j_k_l_m_n_o_p_q_r_s_t_u_v_w_x_y_z_S_0.png'), // placeholder modern illustration
-                      fit: BoxFit.contain,
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "let's start",
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const SizedBox(height: 50),
+                const Spacer(),
+                // Illustration with floating elements
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Main Character
+                    Container(
+                      height: 320,
+                      width: 280,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage('https://ouch-cdn2.icons8.com/mO3hVl9w-bB7m8Vj-asA9m9n0Bv1r-zP-n3G8NqU1Qo/rs:fit:368:368/czM6Ly9pY29uczgu/b3VjaC1wcm9kLnNp/Z25hdHVyZS83ZTM5/MTkzOC00MDUzLTRj/OTEtYWRmNS0yYmE1/YjBlMzViOWYucG5n'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    // Floating Elements (Simulated with Icons)
+                    _buildFloatingIcon(Icons.timer_outlined, -120, -100, Colors.redAccent),
+                    _buildFloatingIcon(Icons.calendar_today, 120, -80, Colors.blueAccent),
+                    _buildFloatingIcon(Icons.notifications_none, -100, 100, Colors.orangeAccent),
+                    _buildFloatingIcon(Icons.pie_chart_outline, 110, 80, Colors.greenAccent),
+                  ],
+                ),
+                const SizedBox(height: 60),
                 Text(
                   'Task Management &\nTo-Do List',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontSize: 28,
-                    height: 1.2,
+                    fontSize: 26,
+                    height: 1.3,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Text(
                   'This productive tool is designed to help you better manage your task project-wise conveniently!',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: AppColors.textSecondary,
+                    height: 1.5,
                   ),
                 ),
                 const Spacer(),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Let\'s Start'),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.arrow_forward_rounded, size: 20),
+                Container(
+                  width: double.infinity,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
                     ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text('Let\'s Start', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 12),
+                        Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -87,4 +117,26 @@ class OnboardingScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildFloatingIcon(IconData icon, double x, double y, Color color) {
+    return Transform.translate(
+      offset: Offset(x, y),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
 }
+
