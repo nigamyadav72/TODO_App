@@ -10,8 +10,12 @@ class TaskProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> fetchTasks() async {
-    _isLoading = true;
-    notifyListeners();
+    final token = await ApiService.getToken();
+    if (token == null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
 
     try {
       _tasks = await ApiService.getTasks();

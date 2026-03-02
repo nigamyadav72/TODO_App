@@ -31,6 +31,10 @@ class ApiService {
         final data = jsonDecode(response.body);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', data['token']);
+        if (data['user'] != null) {
+          await prefs.setString('user_name', data['user']['username'] ?? '');
+          await prefs.setString('user_email', data['user']['email'] ?? '');
+        }
         return true;
       } else {
         debugPrint('Login failed with status: ${response.statusCode}');
@@ -39,6 +43,35 @@ class ApiService {
       }
     } catch (e) {
       debugPrint('Login exception: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> register(String username, String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/register/'),
+        body: jsonEncode({
+          'username': username,
+          'email': email,
+          'password': password,
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', data['token']);
+        if (data['user'] != null) {
+          await prefs.setString('user_name', data['user']['username'] ?? '');
+          await prefs.setString('user_email', data['user']['email'] ?? '');
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Register exception: $e');
       return false;
     }
   }
@@ -101,6 +134,17 @@ class ApiService {
   }
   static Future<bool> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    return await prefs.remove('auth_token');
+    await prefs.remove('auth_token');
+    await prefs.remove('user_name');
+    await prefs.remove('user_email');
+    return true;
+  }
+
+  static Future<Map<String, String?>> getUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'name': prefs.getString('user_name'),
+      'email': prefs.getString('user_email'),
+    };
   }
 }

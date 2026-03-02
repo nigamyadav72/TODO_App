@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'register_screen.dart';
 import '../../core/constants/colors.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_provider.dart';
@@ -14,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   void _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -34,13 +36,17 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      if (!mounted) return;
-      // No need to navigate manually, AuthWrapper will switch to HomeScreen
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      if (mounted) {
+        // Navigator.pop(context) is safer if popUntil is failing due to root complexity
+        Navigator.pop(context);
+      }
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid credentials or server error')),
+        const SnackBar(
+          content: Text('Login failed. Please check credentials or server connection.'),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
@@ -83,6 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
               label: 'Password',
               icon: Icons.lock_outline_rounded,
               isPassword: true,
+              obscureText: _obscurePassword,
+              onToggleVisibility: () {
+                setState(() => _obscurePassword = !_obscurePassword);
+              },
             ),
             const SizedBox(height: 10),
             Align(
@@ -105,7 +115,12 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const Text('Don\'t have an account?'),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                    );
+                  },
                   child: const Text(
                     'Sign Up',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -124,6 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggleVisibility,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,16 +155,25 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 10),
         TextField(
           controller: controller,
-          obscureText: isPassword,
+          obscureText: isPassword ? obscureText : false,
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.primary),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: AppColors.textSecondary,
+                    ),
+                    onPressed: onToggleVisibility,
+                  )
+                : null,
             filled: true,
             fillColor: Colors.grey.withOpacity(0.05),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 20),
+            contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           ),
         ),
       ],

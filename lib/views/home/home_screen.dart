@@ -103,16 +103,39 @@ class _HomeScreenState extends State<HomeScreen> {
               'Hello!',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            Text(
-              'Livia Vaccaro',
-              style: Theme.of(context).textTheme.titleLarge,
+            Consumer<AuthProvider>(
+              builder: (context, auth, _) => Text(
+                auth.userName,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
           ],
         ),
         const Spacer(),
         IconButton(
           icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 24),
-          onPressed: () => Provider.of<AuthProvider>(context, listen: false).logout(),
+          onPressed: () async {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Logout'),
+                content: const Text('Are you sure you want to logout?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Logout', style: TextStyle(color: AppColors.error)),
+                  ),
+                ],
+              ),
+            );
+            if (confirmed == true && mounted) {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+            }
+          },
         ),
         Stack(
           children: [

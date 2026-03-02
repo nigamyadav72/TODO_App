@@ -15,6 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   void _handleRegister() async {
     if (_usernameController.text.isEmpty || 
@@ -38,12 +39,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      if (!mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration failed. Email might already exist.')),
+        const SnackBar(
+          content: Text('Registration failed. Email might already exist.'),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
@@ -92,6 +97,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               label: 'Password',
               icon: Icons.lock_outline_rounded,
               isPassword: true,
+              obscureText: _obscurePassword,
+              onToggleVisibility: () {
+                setState(() => _obscurePassword = !_obscurePassword);
+              },
             ),
             const SizedBox(height: 40),
             ElevatedButton(
@@ -125,6 +134,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggleVisibility,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,16 +150,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 10),
         TextField(
           controller: controller,
-          obscureText: isPassword,
+          obscureText: isPassword ? obscureText : false,
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppColors.primary),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: AppColors.textSecondary,
+                    ),
+                    onPressed: onToggleVisibility,
+                  )
+                : null,
             filled: true,
             fillColor: Colors.grey.withOpacity(0.05),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 20),
+            contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           ),
         ),
       ],
