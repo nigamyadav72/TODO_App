@@ -26,7 +26,7 @@ class AppColors {
   static const Color blurGreen = Color(0xFFF6FFED);
   
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF8E8DFF), Color(0xFF5F33E1)],
+    colors: [Color(0xFF6C38FF), Color(0xFF4A25BF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

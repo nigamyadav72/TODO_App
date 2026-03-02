@@ -115,15 +115,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       children: [
         Consumer<AuthProvider>(
-          builder: (context, auth, _) => CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.primary.withOpacity(0.15),
-            child: Text(
-              auth.userName.isNotEmpty ? auth.userName[0].toUpperCase() : 'U',
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+          builder: (context, auth, _) => GestureDetector(
+            onTap: () => setState(() => _currentIndex = 3),
+            child: CircleAvatar(
+              radius: 25,
+              backgroundColor: AppColors.primary.withOpacity(0.15),
+              child: Text(
+                auth.userName.isNotEmpty ? auth.userName[0].toUpperCase() : 'U',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -266,19 +269,19 @@ class _HomeScreenState extends State<HomeScreen> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         if (count != null) ...[
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               count.toString(),
               style: const TextStyle(
-                color: AppColors.primary,
+                color: Colors.white,
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -309,9 +312,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return SizedBox(
-      height: 140,
+      height: 155, // Increased height for better shadow and padding
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4), // Padding for shadow
         itemCount: inProgressTasks.length,
         itemBuilder: (context, index) {
           final task = inProgressTasks[index];
@@ -319,6 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
             task.category,
             task.title,
             _getCategoryColor(task.category),
+            _getCategoryIcon(task.category),
           );
         },
       ),
@@ -351,37 +356,60 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildInProgressCard(String label, String title, Color color) {
+  Widget _buildInProgressCard(String label, String title, Color color, IconData icon) {
     return Container(
-      width: 200,
-      margin: const EdgeInsets.only(right: 16),
+      width: 210,
+      margin: const EdgeInsets.only(right: 16, bottom: 8, top: 2),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withOpacity(0.2)),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: color.withOpacity(0.12), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                label,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 16),
               ),
-              const Spacer(),
-              Icon(Icons.more_horiz, color: AppColors.textSecondary, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: AppColors.textPrimary.withOpacity(0.6),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Icon(IconsaxPlusLinear.more, color: AppColors.textSecondary, size: 16),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+              color: AppColors.textPrimary,
+              height: 1.2,
             ),
           ),
         ],
@@ -503,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildNavIcon(IconsaxPlusBold.calendar, 1),
             const SizedBox(width: 48),
             _buildNavIcon(IconsaxPlusBold.document, 2),
-            _buildNavIcon(IconsaxPlusBold.people, 3),
+            _buildNavIcon(IconsaxPlusBold.user, 3),
           ],
         ),
       ),
@@ -545,9 +573,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             Icon(
-              icon, // Always use bold/filled icon as seen in the image
+              icon, // Always use bold/filled icon
               size: 26,
-              color: isSelected ? AppColors.primary : unselectedColor,
+              color: AppColors.primary, // Deep purple for all icons (selected or not)
             ),
           ],
         ),
