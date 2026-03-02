@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
@@ -8,7 +9,8 @@ import 'add_task_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
   final bool isNested;
-  const TaskListScreen({super.key, this.isNested = false});
+  final VoidCallback? onBack;
+  const TaskListScreen({super.key, this.isNested = false, this.onBack});
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
@@ -49,12 +51,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 // Stylish back arrow
                 GestureDetector(
                   onTap: () {
-                    // Navigate back to dashboard (index 0)
-                    final homeState = context.findAncestorStateOfType<State>();
-                    if (homeState != null && homeState.mounted) {
-                      (homeState as dynamic).setState(() {
-                        (homeState as dynamic)._currentIndex = 0;
-                      });
+                    if (widget.onBack != null) {
+                      widget.onBack!();
                     }
                   },
                   child: Container(
@@ -71,7 +69,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       ],
                     ),
                     child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
+                      IconsaxPlusLinear.arrow_left,
                       size: 18,
                       color: AppColors.textPrimary,
                     ),
@@ -93,7 +91,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
-                    Icons.notifications_rounded,
+                    IconsaxPlusBold.notification,
                     size: 20,
                     color: AppColors.textPrimary,
                   ),

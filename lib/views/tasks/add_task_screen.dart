@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
@@ -82,7 +83,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(IconsaxPlusLinear.arrow_left_2),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -91,7 +92,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, size: 28),
+            icon: const Icon(IconsaxPlusBold.notification, size: 24),
             onPressed: () {},
           ),
         ],
@@ -334,7 +335,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             child: Row(
               children: [
                 const Icon(
-                  Icons.calendar_today_outlined,
+                  IconsaxPlusLinear.calendar,
                   size: 18,
                   color: AppColors.primary,
                 ),
@@ -392,7 +393,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             child: Row(
               children: [
                 const Icon(
-                  Icons.access_time_rounded,
+                  IconsaxPlusLinear.clock,
                   size: 18,
                   color: AppColors.primary,
                 ),

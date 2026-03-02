@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../core/constants/colors.dart';
 import '../../services/auth_provider.dart';
 import '../../services/task_provider.dart';
@@ -122,11 +123,11 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatsRow(TaskProvider taskProvider) {
     return Row(
       children: [
-        _buildStatCard('Total', taskProvider.totalTasks.toString(), Icons.list_alt_rounded, AppColors.primary),
+        _buildStatCard('Total', taskProvider.totalTasks.toString(), IconsaxPlusLinear.document_text_1, AppColors.primary),
         const SizedBox(width: 12),
-        _buildStatCard('Done', taskProvider.completedTasks.toString(), Icons.check_circle_outline, AppColors.success),
+        _buildStatCard('Done', taskProvider.completedTasks.toString(), IconsaxPlusLinear.tick_circle, AppColors.success),
         const SizedBox(width: 12),
-        _buildStatCard('Pending', taskProvider.todoCount.toString(), Icons.pending_outlined, AppColors.warning),
+        _buildStatCard('Pending', taskProvider.todoCount.toString(), IconsaxPlusLinear.clock, AppColors.warning),
       ],
     );
   }
@@ -183,7 +184,7 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         children: [
           _buildMenuItem(
-            icon: Icons.person_outline_rounded,
+            icon: IconsaxPlusLinear.user,
             title: 'Account Details',
             subtitle: auth.userEmail,
             color: AppColors.primary,
@@ -191,7 +192,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           _divider(),
           _buildMenuItem(
-            icon: Icons.notifications_outlined,
+            icon: IconsaxPlusLinear.notification,
             title: 'Notifications',
             subtitle: 'Manage notifications',
             color: AppColors.warning,
@@ -199,7 +200,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           _divider(),
           _buildMenuItem(
-            icon: Icons.help_outline_rounded,
+            icon: IconsaxPlusLinear.info_circle,
             title: 'Help & Support',
             subtitle: 'FAQs, guides, and more',
             color: AppColors.personalTask,
@@ -207,7 +208,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           _divider(),
           _buildMenuItem(
-            icon: Icons.mail_outline_rounded,
+            icon: IconsaxPlusLinear.message_2,
             title: 'Contact Us',
             subtitle: 'support@todoapp.com',
             color: AppColors.success,
@@ -215,7 +216,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           _divider(),
           _buildMenuItem(
-            icon: Icons.info_outline_rounded,
+            icon: IconsaxPlusLinear.document,
             title: 'About',
             subtitle: 'Version 1.0.0',
             color: AppColors.textSecondary,
@@ -223,7 +224,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           _divider(),
           _buildMenuItem(
-            icon: Icons.logout_rounded,
+            icon: IconsaxPlusLinear.logout,
             title: 'Logout',
             subtitle: 'Sign out of your account',
             color: AppColors.error,
@@ -325,9 +326,9 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 6),
             Text(auth.userEmail, style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
             const SizedBox(height: 24),
-            _detailRow(Icons.person_outline, 'Username', auth.userName),
+            _detailRow(IconsaxPlusLinear.user, 'Username', auth.userName),
             const SizedBox(height: 12),
-            _detailRow(Icons.email_outlined, 'Email', auth.userEmail),
+            _detailRow(IconsaxPlusLinear.message, 'Email', auth.userEmail),
             const SizedBox(height: 24),
           ],
         ),

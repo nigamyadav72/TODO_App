@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
@@ -39,7 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
             index: _currentIndex, // Limit for now if placeholder
             children: [
               _buildDashboard(taskProvider),
-              const TaskListScreen(isNested: true),
+              TaskListScreen(
+                isNested: true,
+                onBack: () => setState(() => _currentIndex = 0),
+              ),
               const ProjectsScreen(),
               const ProfileScreen(),
             ],
@@ -150,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
-                Icons.notifications_rounded,
+                IconsaxPlusBold.notification,
                 size: 24,
                 color: AppColors.textPrimary,
               ),
@@ -474,14 +478,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       height: 90,
       decoration: BoxDecoration(
-        color: AppColors.bottomBarBackground,
+        color: const Color(0xFFF6F5FF), // Very light lavender background matching image
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(40),
           topRight: Radius.circular(40),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -490,16 +494,16 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BottomAppBar(
         color: Colors.transparent,
         elevation: 0,
-        notchMargin: 12,
+        notchMargin: 12, // Notch margin as per standard CircularNotchedRectangle
         shape: const CircularNotchedRectangle(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavIcon(Icons.home_filled, 0),
-            _buildNavIcon(Icons.calendar_month_rounded, 1),
+            _buildNavIcon(IconsaxPlusBold.home_1, 0),
+            _buildNavIcon(IconsaxPlusBold.calendar, 1),
             const SizedBox(width: 48),
-            _buildNavIcon(Icons.insert_drive_file_rounded, 2),
-            _buildNavIcon(Icons.people_rounded, 3),
+            _buildNavIcon(IconsaxPlusBold.document, 2),
+            _buildNavIcon(IconsaxPlusBold.people, 3),
           ],
         ),
       ),
@@ -508,34 +512,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNavIcon(IconData icon, int index) {
     bool isSelected = _currentIndex == index;
+    // Unselected color is a light lavender purple constant
+    final Color unselectedColor = const Color(0xFFB8B0D4);
+    
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 48,
-        height: 48,
-        child: Center(
-          child: Container(
-            decoration: isSelected
-                ? BoxDecoration(
+        width: 50,
+        height: 50,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Shadow only for selected icon
+            if (isSelected)
+              Positioned(
+                bottom: 12,
+                child: Container(
+                  width: 14,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.35),
-                        blurRadius: 12,
+                        color: AppColors.primary.withOpacity(0.5),
+                        blurRadius: 10,
+                        spreadRadius: 4,
                         offset: const Offset(0, 4),
-                        spreadRadius: 0,
                       ),
                     ],
-                  )
-                : null,
-            child: Icon(
-              icon,
+                  ),
+                ),
+              ),
+            Icon(
+              icon, // Always use bold/filled icon as seen in the image
               size: 26,
-              color: isSelected
-                  ? AppColors.primary
-                  : const Color(0xFFB8B0D4),
+              color: isSelected ? AppColors.primary : unselectedColor,
             ),
-          ),
+          ],
         ),
       ),
     );
