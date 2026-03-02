@@ -81,6 +81,24 @@ class ApiService {
       return false;
     }
   }
+
+  static Future<bool> deleteTask(String id) async {
+    try {
+      final token = await getToken();
+      final response = await http.delete(
+        Uri.parse('$baseUrl/tasks/$id/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Token $token',
+        },
+      );
+
+      return response.statusCode == 204;
+    } catch (e) {
+      debugPrint('Delete task error: $e');
+      return false;
+    }
+  }
   static Future<bool> logout() async {
     final prefs = await SharedPreferences.getInstance();
     return await prefs.remove('auth_token');

@@ -227,6 +227,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       itemBuilder: (context, index) {
         final task = filteredTasks[index];
         return _buildTaskItem(
+          task.id,
           task.category, // Assuming category corresponds to project label
           task.title,
           DateFormat('hh:mm a').format(task.startTime),
@@ -250,7 +251,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
-  Widget _buildTaskItem(String project, String task, String time, String status, Color color) {
+  Widget _buildTaskItem(String id, String project, String task, String time, String status, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(20),
@@ -281,7 +282,55 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
-              Icon(Icons.more_horiz, color: AppColors.textSecondary),
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_horiz, color: AppColors.textSecondary),
+                onSelected: (value) async {
+                  if (value == 'delete') {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Task'),
+                        content: const Text('Are you sure you want to delete this task?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmed == true && mounted) {
+                      final success = await Provider.of<TaskProvider>(context, listen: false).deleteTask(id);
+                      if (success && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Task deleted successfully')),
+                        );
+                      } else if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Failed to delete task')),
+                        );
+                      }
+                    }
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                        SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(color: AppColors.error)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 16),

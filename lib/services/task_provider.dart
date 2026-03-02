@@ -30,4 +30,12 @@ class TaskProvider with ChangeNotifier {
     }
     return success;
   }
+
+  Future<bool> deleteTask(String id) async {
+    bool success = await ApiService.deleteTask(id);
+    if (success) {
+      await fetchTasks();
+    }
+    return success;
+  }
 }

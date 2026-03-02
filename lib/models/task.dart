@@ -27,7 +27,7 @@ class Task {
       startTime: DateTime.parse(json['start_time']),
       endTime: DateTime.parse(json['end_time']),
       status: json['status'],
-      groupId: json['group_id']?.toString() ?? '',
+      groupId: json['group']?.toString() ?? '',
       category: json['category'] ?? 'Work',
     );
   }
@@ -39,7 +39,7 @@ class Task {
       'start_time': startTime.toIso8601String(),
       'end_time': endTime.toIso8601String(),
       'status': status,
-      'group_id': groupId,
+      'group': groupId,
       'category': category,
     };
   }

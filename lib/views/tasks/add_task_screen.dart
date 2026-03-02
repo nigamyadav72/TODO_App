@@ -48,6 +48,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
     setState(() => _isSaving = false);
 
+    if (!mounted) return;
+
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Project added successfully!')),
