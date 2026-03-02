@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app/views/auth/login_screen.dart';
 import 'core/themes/app_theme.dart';
 import 'views/onboarding/onboarding_screen.dart';
 
@@ -33,20 +34,34 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _showLogin = false;
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
     if (authProvider.isChecking) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return authProvider.isAuthenticated ? const HomeScreen() : const OnboardingScreen();
+    if (authProvider.isAuthenticated) {
+      return const HomeScreen();
+    }
+
+    // If we're not authenticated, show either Onboarding or Login
+    if (_showLogin) {
+      return const LoginScreen();
+    }
+
+    return OnboardingScreen(onStart: () => setState(() => _showLogin = true));
   }
 }
 

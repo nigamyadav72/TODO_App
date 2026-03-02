@@ -4,7 +4,8 @@ import '../../widgets/decorative_background.dart';
 import '../auth/login_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
+  final VoidCallback onStart;
+  const OnboardingScreen({super.key, required this.onStart});
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +87,7 @@ class OnboardingScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      );
-                    },
+                    onPressed: onStart,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,

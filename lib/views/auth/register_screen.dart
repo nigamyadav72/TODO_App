@@ -39,9 +39,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      debugPrint('Signup success');
+      // No Navigator.pop() needed
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

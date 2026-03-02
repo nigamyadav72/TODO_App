@@ -36,15 +36,14 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      if (mounted) {
-        // Navigator.pop(context) is safer if popUntil is failing due to root complexity
-        Navigator.pop(context);
-      }
+      // We don't need to pop or navigate. 
+      // AuthProvider will notifyListeners, AuthWrapper will rebuild and swap the root to HomeScreen.
+      debugPrint('Login success, waiting for AuthWrapper rebuild');
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Login failed. Please check credentials or server connection.'),
+          content: Text('Login failed. Please check credentials.'),
           backgroundColor: AppColors.error,
         ),
       );
