@@ -18,6 +18,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final _descriptionController = TextEditingController();
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 1));
+  TimeOfDay? _startTime;
+  TimeOfDay? _endTime;
   bool _isSaving = false;
 
   void _handleSave() async {
@@ -30,14 +32,24 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
     setState(() => _isSaving = true);
 
+    // Combine date + optional time
+    final startDateTime = DateTime(
+      _startDate.year, _startDate.month, _startDate.day,
+      _startTime?.hour ?? 0, _startTime?.minute ?? 0,
+    );
+    final endDateTime = DateTime(
+      _endDate.year, _endDate.month, _endDate.day,
+      _endTime?.hour ?? 23, _endTime?.minute ?? 59,
+    );
+
     final newTask = Task(
-      id: '', // Backend will generate or we use a temp string
+      id: '',
       title: _nameController.text,
       description: _descriptionController.text,
-      startTime: _startDate,
-      endTime: _endDate,
+      startTime: startDateTime,
+      endTime: endDateTime,
       status: 'To-do',
-      groupId: '1', // Default group for now
+      groupId: '1',
       category: _selectedGroup,
     );
 
@@ -121,6 +133,22 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   Expanded(
                     child: _buildDateField('End Date', _endDate, (date) {
                       if (date != null) setState(() => _endDate = date);
+                    }),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTimeField('Start Time', _startTime, (time) {
+                      setState(() => _startTime = time);
+                    }),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTimeField('End Time', _endTime, (time) {
+                      setState(() => _endTime = time);
                     }),
                   ),
                 ],
@@ -315,6 +343,78 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   "${date.day} ${_getMonthName(date.month)}, ${date.year}",
                   style: const TextStyle(fontSize: 12),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeField(
+    String label,
+    TimeOfDay? time,
+    Function(TimeOfDay?) onPicked,
+  ) {
+    final displayText = time != null
+        ? time.format(context)
+        : 'Optional';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: () async {
+            final picked = await showTimePicker(
+              context: context,
+              initialTime: time ?? TimeOfDay.now(),
+            );
+            if (picked != null) {
+              onPicked(picked);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.access_time_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    displayText,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: time != null ? AppColors.textPrimary : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                if (time != null)
+                  GestureDetector(
+                    onTap: () => onPicked(null),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
               ],
             ),
           ),

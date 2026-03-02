@@ -42,14 +42,63 @@ class _TaskListScreenState extends State<TaskListScreen> {
       children: [
         if (widget.isNested) ...[
           const SizedBox(height: 20),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Today\'s Tasks',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                // Stylish back arrow
+                GestureDetector(
+                  onTap: () {
+                    // Navigate back to dashboard (index 0)
+                    final homeState = context.findAncestorStateOfType<State>();
+                    if (homeState != null && homeState.mounted) {
+                      (homeState as dynamic).setState(() {
+                        (homeState as dynamic)._currentIndex = 0;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 18,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'Today\'s Tasks',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ),
+                // Dark notification bell
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_rounded,
+                    size: 20,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),

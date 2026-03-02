@@ -7,6 +7,8 @@ import '../../services/task_provider.dart';
 import '../../services/auth_provider.dart';
 import '../tasks/task_list_screen.dart';
 import '../tasks/add_task_screen.dart';
+import '../projects/projects_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,23 +40,37 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _buildDashboard(taskProvider),
               const TaskListScreen(isNested: true),
-              const Center(child: Text('Projects View', style: TextStyle(fontSize: 20))),
-              const Center(child: Text('Groups View', style: TextStyle(fontSize: 20))),
+              const ProjectsScreen(),
+              const ProfileScreen(),
             ],
           ),
         ),
       ),
       bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddTaskScreen()),
-          );
-        },
-        backgroundColor: AppColors.primary,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+            );
+          },
+          backgroundColor: AppColors.primary,
+          elevation: 0,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -94,9 +110,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader() {
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 25,
-          backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=a042581f4e29026704d'),
+        Consumer<AuthProvider>(
+          builder: (context, auth, _) => CircleAvatar(
+            radius: 25,
+            backgroundColor: AppColors.primary.withOpacity(0.15),
+            child: Text(
+              auth.userName.isNotEmpty ? auth.userName[0].toUpperCase() : 'U',
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
         const SizedBox(width: 15),
         Column(
@@ -115,42 +141,25 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const Spacer(),
-        IconButton(
-          icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 24),
-          onPressed: () async {
-            final confirmed = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Logout'),
-                content: const Text('Are you sure you want to logout?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Logout', style: TextStyle(color: AppColors.error)),
-                  ),
-                ],
-              ),
-            );
-            if (confirmed == true && mounted) {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            }
-          },
-        ),
         Stack(
           children: [
-            IconButton(
-              icon: const Icon(Icons.notifications_none_rounded, size: 28),
-              onPressed: () {},
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.notifications_rounded,
+                size: 24,
+                color: AppColors.textPrimary,
+              ),
             ),
             Positioned(
-              right: 12,
-              top: 12,
+              right: 6,
+              top: 6,
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(3),
                 decoration: const BoxDecoration(
                   color: AppColors.error,
                   shape: BoxShape.circle,
@@ -470,6 +479,13 @@ class _HomeScreenState extends State<HomeScreen> {
           topLeft: Radius.circular(40),
           topRight: Radius.circular(40),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: BottomAppBar(
         color: Colors.transparent,
@@ -483,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildNavIcon(Icons.calendar_month_rounded, 1),
             const SizedBox(width: 48),
             _buildNavIcon(Icons.insert_drive_file_rounded, 2),
-            _buildNavIcon(Icons.group_rounded, 3),
+            _buildNavIcon(Icons.people_rounded, 3),
           ],
         ),
       ),
@@ -492,13 +508,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNavIcon(IconData icon, int index) {
     bool isSelected = _currentIndex == index;
-    return IconButton(
-      icon: Icon(
-        icon,
-        size: 28,
-        color: isSelected ? AppColors.primary : AppColors.textSecondary.withOpacity(0.5),
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: Center(
+          child: Container(
+            decoration: isSelected
+                ? BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  )
+                : null,
+            child: Icon(
+              icon,
+              size: 26,
+              color: isSelected
+                  ? AppColors.primary
+                  : const Color(0xFFB8B0D4),
+            ),
+          ),
+        ),
       ),
-      onPressed: () => setState(() => _currentIndex = index),
     );
   }
 }
