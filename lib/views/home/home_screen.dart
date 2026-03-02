@@ -61,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDashboard(TaskProvider taskProvider) {
+    final categories = taskProvider.categoryStats;
     return RefreshIndicator(
       onRefresh: () => taskProvider.fetchTasks(),
       child: SingleChildScrollView(
@@ -72,15 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             _buildHeader(),
             const SizedBox(height: 30),
-            _buildTodayTaskCard(),
+            _buildTodayTaskCard(taskProvider),
             const SizedBox(height: 30),
-            _buildSectionHeader('In Progress', onSeeAll: () {}),
+            _buildSectionHeader('In Progress', count: taskProvider.inProgressCount, onSeeAll: () {
+              setState(() => _currentIndex = 1);
+            }),
             const SizedBox(height: 16),
-            _buildInProgressList(),
+            _buildInProgressList(taskProvider),
             const SizedBox(height: 30),
-            _buildSectionHeader('Task Groups', count: 4),
+            _buildSectionHeader('Task Groups', count: categories.length),
             const SizedBox(height: 16),
-            _buildTaskGroupsList(),
+            _buildTaskGroupsList(taskProvider),
             const SizedBox(height: 110),
           ],
         ),
@@ -161,7 +164,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTodayTaskCard() {
+  Widget _buildTodayTaskCard(TaskProvider taskProvider) {
+    final total = taskProvider.totalTasks;
+    final done = taskProvider.completedTasks;
+    final percent = taskProvider.overallProgress;
+    final percentInt = (percent * 100).toInt();
+
+    String message;
+    if (total == 0) {
+      message = 'No tasks yet.\nAdd some tasks!';
+    } else if (percent >= 1.0) {
+      message = 'All tasks done!\nGreat job!';
+    } else if (percent >= 0.5) {
+      message = 'Your tasks are\nalmost done!';
+    } else {
+      message = 'You have $total tasks.\n$done completed so far.';
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -181,9 +200,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Your today\'s task\nalmost done!',
-                  style: TextStyle(
+                Text(
+                  message,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -208,10 +227,10 @@ class _HomeScreenState extends State<HomeScreen> {
           CircularPercentIndicator(
             radius: 45.0,
             lineWidth: 8.0,
-            percent: 0.85,
-            center: const Text(
-              "85%",
-              style: TextStyle(
+            percent: percent.clamp(0.0, 1.0),
+            center: Text(
+              '$percentInt%',
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -261,25 +280,62 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildInProgressList() {
+  Widget _buildInProgressList(TaskProvider taskProvider) {
+    final inProgressTasks = taskProvider.inProgressTasks;
+
+    if (inProgressTasks.isEmpty) {
+      return SizedBox(
+        height: 140,
+        child: Center(
+          child: Text(
+            'No tasks in progress',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 140,
-      child: ListView(
+      child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        children: [
-          _buildInProgressCard(
-            'Office Project',
-            'Grocery shopping app design',
-            AppColors.workTask,
-          ),
-          _buildInProgressCard(
-            'Personal Project',
-            'Uber Eats redesign challenge',
-            AppColors.personalTask,
-          ),
-        ],
+        itemCount: inProgressTasks.length,
+        itemBuilder: (context, index) {
+          final task = inProgressTasks[index];
+          return _buildInProgressCard(
+            task.category,
+            task.title,
+            _getCategoryColor(task.category),
+          );
+        },
       ),
     );
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Work':
+        return AppColors.workTask;
+      case 'Personal':
+        return AppColors.personalTask;
+      case 'Daily Study':
+        return AppColors.studyTask;
+      default:
+        return Colors.purple;
+    }
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Work':
+        return Icons.work_outline;
+      case 'Personal':
+        return Icons.person_outline;
+      case 'Daily Study':
+        return Icons.book_outlined;
+      default:
+        return Icons.folder_outlined;
+    }
   }
 
   Widget _buildInProgressCard(String label, String title, Color color) {
@@ -320,14 +376,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTaskGroupsList() {
+  Widget _buildTaskGroupsList(TaskProvider taskProvider) {
+    final categories = taskProvider.categoryStats;
+
+    if (categories.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'No task groups yet. Add tasks to see groups here.',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+
     return Column(
-      children: [
-        _buildTaskGroupItem('Office Project', 25, 0.7, AppColors.workTask, Icons.work_outline),
-        _buildTaskGroupItem('Personal Project', 30, 0.52, AppColors.personalTask, Icons.person_outline),
-        _buildTaskGroupItem('Daily Study', 12, 0.87, AppColors.studyTask, Icons.book_outlined),
-        _buildTaskGroupItem('Household', 10, 0.2, Colors.purple, Icons.home_outlined),
-      ],
+      children: categories.map((cat) {
+        final name = cat['name'] as String;
+        final total = cat['total'] as int;
+        final progress = (cat['progress'] as double).clamp(0.0, 1.0);
+        final color = _getCategoryColor(name);
+        final icon = _getCategoryIcon(name);
+        return _buildTaskGroupItem(name, total, progress, color, icon);
+      }).toList(),
     );
   }
 

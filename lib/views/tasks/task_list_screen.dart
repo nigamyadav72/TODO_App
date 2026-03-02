@@ -15,17 +15,26 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  int _selectedDateIndex = 2; // May 25
+  late int _selectedDateIndex;
   String _selectedFilter = 'All';
 
   final List<String> _filters = ['All', 'To do', 'In Progress', 'Complete'];
-  final List<Map<String, dynamic>> _dates = [
-    {'day': '23', 'weekday': 'Fri', 'month': 'May'},
-    {'day': '24', 'weekday': 'Sat', 'month': 'May'},
-    {'day': '25', 'weekday': 'Sun', 'month': 'May'},
-    {'day': '26', 'weekday': 'Mon', 'month': 'May'},
-    {'day': '27', 'weekday': 'Tue', 'month': 'May'},
-  ];
+  late List<DateTime> _dates;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateDates();
+  }
+
+  void _generateDates() {
+    final now = DateTime.now();
+    // Generate 7 days: 3 before today, today, 3 after today
+    _dates = List.generate(7, (i) {
+      return DateTime(now.year, now.month, now.day - 3 + i);
+    });
+    _selectedDateIndex = 3; // today is at index 3
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +108,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
         itemCount: _dates.length,
         itemBuilder: (context, index) {
           bool isSelected = _selectedDateIndex == index;
+          final date = _dates[index];
+          final dayStr = date.day.toString();
+          final weekdayStr = DateFormat('E').format(date); // Mon, Tue, etc.
+          final monthStr = DateFormat('MMM').format(date);  // Jan, Feb, etc.
+          final isToday = _isToday(date);
           return GestureDetector(
             onTap: () => setState(() => _selectedDateIndex = index),
             child: Container(
@@ -120,14 +134,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _dates[index]['month'],
+                    monthStr,
                     style: TextStyle(
                       color: isSelected ? Colors.white70 : AppColors.textSecondary,
                       fontSize: 10,
                     ),
                   ),
                   Text(
-                    _dates[index]['day'],
+                    dayStr,
                     style: TextStyle(
                       color: isSelected ? Colors.white : AppColors.textPrimary,
                       fontSize: 20,
@@ -135,7 +149,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     ),
                   ),
                   Text(
-                    _dates[index]['weekday'],
+                    isToday ? 'Today' : weekdayStr,
                     style: TextStyle(
                       color: isSelected ? Colors.white70 : AppColors.textSecondary,
                       fontSize: 10,
@@ -148,6 +162,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
         },
       ),
     );
+  }
+
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year && date.month == now.month && date.day == now.day;
   }
 
   Widget _buildFilterChips() {
@@ -197,11 +216,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
       targetStatus = 'Done';
     }
 
+    final selectedDate = _dates[_selectedDateIndex];
+
     final filteredTasks = allTasks.where((task) {
       bool matchesStatus = targetStatus == null || task.status == targetStatus;
-      // In a real app, you'd also check task.startTime against the selected date in _dates[_selectedDateIndex]
-      // For now, we'll just filter by status to make the tabs functional
-      return matchesStatus;
+      // Filter by selected date: check if the task's start_time falls on the selected day
+      bool matchesDate = task.startTime.year == selectedDate.year &&
+          task.startTime.month == selectedDate.month &&
+          task.startTime.day == selectedDate.day;
+      return matchesStatus && matchesDate;
     }).toList();
 
     if (taskProvider.isLoading) {
@@ -209,13 +232,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
 
     if (filteredTasks.isEmpty) {
+      final dateLabel = _isToday(selectedDate)
+          ? 'today'
+          : DateFormat('MMM d').format(selectedDate);
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.task_alt, size: 64, color: AppColors.textSecondary.withOpacity(0.2)),
+            Icon(Icons.event_busy_rounded, size: 64, color: AppColors.textSecondary.withOpacity(0.2)),
             const SizedBox(height: 16),
-            Text('No tasks found for this filter', style: TextStyle(color: AppColors.textSecondary)),
+            Text(
+              'No tasks for $dateLabel',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Tap + to add a task',
+              style: TextStyle(color: AppColors.textSecondary.withOpacity(0.6), fontSize: 13),
+            ),
           ],
         ),
       );
@@ -343,18 +377,46 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    color: _getStatusColor(status),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () async {
+                  final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+                  final nextStatus = taskProvider.getNextStatus(status);
+                  final success = await taskProvider.updateTaskStatus(id, nextStatus);
+                  if (success && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Status changed to $nextStatus')),
+                    );
+                  }
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(status).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: _getStatusColor(status).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        status,
+                        style: TextStyle(
+                          color: _getStatusColor(status),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.swap_horiz_rounded,
+                        size: 12,
+                        color: _getStatusColor(status),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -132,6 +132,25 @@ class ApiService {
       return false;
     }
   }
+
+  static Future<bool> updateTaskStatus(String id, String status) async {
+    try {
+      final token = await getToken();
+      final response = await http.patch(
+        Uri.parse('$baseUrl/tasks/$id/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Token $token',
+        },
+        body: jsonEncode({'status': status}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Update task status error: $e');
+      return false;
+    }
+  }
   static Future<bool> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
