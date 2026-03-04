@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:todo_app/views/tasks/add_task_screen.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
-
 
 class TaskListScreen extends StatefulWidget {
   final bool isNested;
@@ -79,7 +79,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   child: Center(
                     child: Text(
                       'Today\'s Tasks',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -121,7 +124,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Today\'s Tasks', style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text(
+          'Today\'s Tasks',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded, size: 28),
@@ -158,7 +164,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           final date = _dates[index];
           final dayStr = date.day.toString();
           final weekdayStr = DateFormat('E').format(date); // Mon, Tue, etc.
-          final monthStr = DateFormat('MMM').format(date);  // Jan, Feb, etc.
+          final monthStr = DateFormat('MMM').format(date); // Jan, Feb, etc.
           final isToday = _isToday(date);
           return GestureDetector(
             onTap: () => setState(() => _selectedDateIndex = index),
@@ -183,7 +189,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   Text(
                     monthStr,
                     style: TextStyle(
-                      color: isSelected ? Colors.white70 : AppColors.textSecondary,
+                      color: isSelected
+                          ? Colors.white70
+                          : AppColors.textSecondary,
                       fontSize: 10,
                     ),
                   ),
@@ -198,7 +206,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   Text(
                     isToday ? 'Today' : weekdayStr,
                     style: TextStyle(
-                      color: isSelected ? Colors.white70 : AppColors.textSecondary,
+                      color: isSelected
+                          ? Colors.white70
+                          : AppColors.textSecondary,
                       fontSize: 10,
                     ),
                   ),
@@ -213,7 +223,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return date.year == now.year && date.month == now.month && date.day == now.day;
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
   }
 
   Widget _buildFilterChips() {
@@ -268,7 +280,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final filteredTasks = allTasks.where((task) {
       bool matchesStatus = targetStatus == null || task.status == targetStatus;
       // Filter by selected date: check if the task's start_time falls on the selected day
-      bool matchesDate = task.startTime.year == selectedDate.year &&
+      bool matchesDate =
+          task.startTime.year == selectedDate.year &&
           task.startTime.month == selectedDate.month &&
           task.startTime.day == selectedDate.day;
       return matchesStatus && matchesDate;
@@ -286,16 +299,27 @@ class _TaskListScreenState extends State<TaskListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_busy_rounded, size: 64, color: AppColors.textSecondary.withOpacity(0.2)),
+            Icon(
+              Icons.event_busy_rounded,
+              size: 64,
+              color: AppColors.textSecondary.withOpacity(0.2),
+            ),
             const SizedBox(height: 16),
             Text(
               'No tasks for $dateLabel',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tap + to add a task',
-              style: TextStyle(color: AppColors.textSecondary.withOpacity(0.6), fontSize: 13),
+              style: TextStyle(
+                color: AppColors.textSecondary.withOpacity(0.6),
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -332,7 +356,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
-  Widget _buildTaskItem(String id, String project, String task, String time, String status, Color color) {
+  Widget _buildTaskItem(
+    String id,
+    String project,
+    String task,
+    String time,
+    String status,
+    Color color,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(20),
@@ -360,7 +391,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
               Expanded(
                 child: Text(
                   task,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               PopupMenuButton<String>(
@@ -371,7 +405,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Delete Task'),
-                        content: const Text('Are you sure you want to delete this task?'),
+                        content: const Text(
+                          'Are you sure you want to delete this task?',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
@@ -379,21 +415,31 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           ),
                           TextButton(
                             onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(color: AppColors.error),
+                            ),
                           ),
                         ],
                       ),
                     );
 
                     if (confirmed == true && mounted) {
-                      final success = await Provider.of<TaskProvider>(context, listen: false).deleteTask(id);
+                      final success = await Provider.of<TaskProvider>(
+                        context,
+                        listen: false,
+                      ).deleteTask(id);
                       if (success && mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Task deleted successfully')),
+                          const SnackBar(
+                            content: Text('Task deleted successfully'),
+                          ),
                         );
                       } else if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Failed to delete task')),
+                          const SnackBar(
+                            content: Text('Failed to delete task'),
+                          ),
                         );
                       }
                     }
@@ -404,9 +450,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                        Icon(
+                          Icons.delete_outline,
+                          color: AppColors.error,
+                          size: 20,
+                        ),
                         SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: AppColors.error)),
+                        Text(
+                          'Delete',
+                          style: TextStyle(color: AppColors.error),
+                        ),
                       ],
                     ),
                   ),
@@ -426,9 +479,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
               const Spacer(),
               GestureDetector(
                 onTap: () async {
-                  final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+                  final taskProvider = Provider.of<TaskProvider>(
+                    context,
+                    listen: false,
+                  );
                   final nextStatus = taskProvider.getNextStatus(status);
-                  final success = await taskProvider.updateTaskStatus(id, nextStatus);
+                  final success = await taskProvider.updateTaskStatus(
+                    id,
+                    nextStatus,
+                  );
                   if (success && mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Status changed to $nextStatus')),
@@ -437,7 +496,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(status).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -504,20 +566,36 @@ class _TaskListScreenState extends State<TaskListScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: const Icon(Icons.home_filled, size: 28, color: AppColors.textSecondary),
+              icon: const Icon(
+                Icons.home_filled,
+                size: 28,
+                color: AppColors.textSecondary,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             IconButton(
-              icon: const Icon(Icons.calendar_month_rounded, size: 28, color: AppColors.primary),
+              icon: const Icon(
+                Icons.calendar_month_rounded,
+                size: 28,
+                color: AppColors.primary,
+              ),
               onPressed: () {},
             ),
             const SizedBox(width: 48),
             IconButton(
-              icon: const Icon(Icons.insert_drive_file_rounded, size: 28, color: AppColors.textSecondary),
+              icon: const Icon(
+                Icons.insert_drive_file_rounded,
+                size: 28,
+                color: AppColors.textSecondary,
+              ),
               onPressed: () {},
             ),
             IconButton(
-              icon: const Icon(Icons.group_rounded, size: 28, color: AppColors.textSecondary),
+              icon: const Icon(
+                Icons.group_rounded,
+                size: 28,
+                color: AppColors.textSecondary,
+              ),
               onPressed: () {},
             ),
           ],
