@@ -6,6 +6,8 @@ import 'package:todo_app/views/tasks/add_task_screen.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
+import '../notifications/notifications_screen.dart';
+import '../../services/notification_service.dart';
 
 class TaskListScreen extends StatefulWidget {
   final bool isNested;
@@ -93,10 +95,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     color: AppColors.primary.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(
-                    IconsaxPlusBold.notification,
-                    size: 20,
-                    color: AppColors.textPrimary,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                      );
+                    },
+                    child: const Icon(
+                      IconsaxPlusBold.notification,
+                      size: 20,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -130,8 +140,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, size: 28),
-            onPressed: () {},
+            icon: const Icon(IconsaxPlusBold.notification, size: 24),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -430,6 +445,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         listen: false,
                       ).deleteTask(id);
                       if (success && mounted) {
+                        // Cancel notification
+                        NotificationService().cancelNotification(id.hashCode);
+                        
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Task deleted successfully'),
@@ -489,6 +507,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     nextStatus,
                   );
                   if (success && mounted) {
+                    if (nextStatus == 'Done') {
+                      NotificationService().cancelNotification(id.hashCode);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Status changed to $nextStatus')),
                     );

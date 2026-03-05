@@ -38,7 +38,24 @@ class TaskProvider with ChangeNotifier {
     }).toList();
   }
 
+  List<Task> get todayTasks {
+    final now = DateTime.now();
+    return _tasks.where((t) {
+      final date = t.startTime.toLocal();
+      return date.year == now.year &&
+          date.month == now.month &&
+          date.day == now.day;
+    }).toList();
+  }
+
+  int get todayTasksCount => todayTasks.length;
+  int get todayCompletedCount => todayTasks.where((t) => t.status == 'Done').length;
+  double get todayProgress => todayTasksCount == 0 ? 0 : todayCompletedCount / todayTasksCount;
+
   Future<void> fetchTasks() async {
+    _isLoading = true;
+    notifyListeners();
+    
     final token = await ApiService.getToken();
     if (token == null) {
       _isLoading = false;
@@ -56,12 +73,12 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> addTask(Task task) async {
-    bool success = await ApiService.createTask(task);
-    if (success) {
+  Future<Task?> addTask(Task task) async {
+    final newTask = await ApiService.createTask(task);
+    if (newTask != null) {
       await fetchTasks();
     }
-    return success;
+    return newTask;
   }
 
   Future<bool> deleteTask(String id) async {

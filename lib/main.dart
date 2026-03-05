@@ -8,7 +8,12 @@ import 'services/auth_provider.dart';
 import 'services/task_provider.dart';
 import 'views/home/home_screen.dart';
 
-void main() {
+import 'services/notification_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
+  
   runApp(
     MultiProvider(
       providers: [

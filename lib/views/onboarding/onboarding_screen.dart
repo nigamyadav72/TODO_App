@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
-import '../auth/login_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final VoidCallback onStart;

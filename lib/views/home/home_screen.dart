@@ -10,6 +10,8 @@ import '../tasks/task_list_screen.dart';
 import '../tasks/add_task_screen.dart';
 import '../projects/projects_screen.dart';
 import '../profile/profile_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../../models/task.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -156,10 +158,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
-                IconsaxPlusBold.notification,
-                size: 24,
-                color: AppColors.textPrimary,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                  );
+                },
+                child: const Icon(
+                  IconsaxPlusBold.notification,
+                  size: 24,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             Positioned(
@@ -181,9 +191,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTodayTaskCard(TaskProvider taskProvider) {
-    final total = taskProvider.totalTasks;
-    final done = taskProvider.completedTasks;
-    final percent = taskProvider.overallProgress;
+    final total = taskProvider.todayTasksCount;
+    final done = taskProvider.todayCompletedCount;
+    final percent = taskProvider.todayProgress;
     final percentInt = (percent * 100).toInt();
 
     String message;
@@ -273,13 +283,13 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: AppColors.primary.withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               count.toString(),
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.primary,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
@@ -319,12 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: inProgressTasks.length,
         itemBuilder: (context, index) {
           final task = inProgressTasks[index];
-          return _buildInProgressCard(
-            task.category,
-            task.title,
-            _getCategoryColor(task.category),
-            _getCategoryIcon(task.category),
-          );
+          return _buildInProgressCard(task);
         },
       ),
     );
@@ -356,65 +361,98 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildInProgressCard(String label, String title, Color color, IconData icon) {
+  Widget _buildInProgressCard(Task task) {
+    final theme = _getCategoryTheme(task.category);
     return Container(
       width: 210,
       margin: const EdgeInsets.only(right: 16, bottom: 8, top: 2),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: color.withOpacity(0.12), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: theme['bg'],
+        borderRadius: BorderRadius.circular(32),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text(
+                theme['label'],
+                style: TextStyle(
+                  color: AppColors.textPrimary.withOpacity(0.5),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: theme['iconBg'],
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: color, size: 16),
+                child: Icon(theme['icon'], color: theme['iconColor'], size: 14),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: AppColors.textPrimary.withOpacity(0.6),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Icon(IconsaxPlusLinear.more, color: AppColors.textSecondary, size: 16),
             ],
           ),
           const SizedBox(height: 14),
-          Text(
-            title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
-              color: AppColors.textPrimary,
-              height: 1.2,
+          Expanded(
+            child: Text(
+              task.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                color: AppColors.textPrimary,
+                height: 1.25,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: 0.6, // Placeholder for progress as per image
+              backgroundColor: Colors.white,
+              valueColor: AlwaysStoppedAnimation<Color>(theme['progress']),
+              minHeight: 6,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Map<String, dynamic> _getCategoryTheme(String category) {
+    if (category == 'Work') {
+      return {
+        'bg': const Color(0xFFE9F0FF),
+        'progress': const Color(0xFF007BFF),
+        'iconBg': const Color(0xFFFFD6E4),
+        'iconColor': const Color(0xFFFF4D8D),
+        'label': 'Office Project',
+        'icon': Icons.work_outline,
+      };
+    } else if (category == 'Personal') {
+      return {
+        'bg': const Color(0xFFFFEFEE),
+        'progress': const Color(0xFFFF8A5C),
+        'iconBg': const Color(0xFFFFE0D4),
+        'iconColor': const Color(0xFFFF8A5C),
+        'label': 'Personal Project',
+        'icon': Icons.person_outline,
+      };
+    } else {
+      return {
+        'bg': const Color(0xFFF3EFFF),
+        'progress': AppColors.primary,
+        'iconBg': AppColors.primary.withOpacity(0.1),
+        'iconColor': AppColors.primary,
+        'label': category,
+        'icon': Icons.folder_outlined,
+      };
+    }
   }
 
   Widget _buildTaskGroupsList(TaskProvider taskProvider) {
@@ -541,7 +579,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavIcon(IconData icon, int index) {
     bool isSelected = _currentIndex == index;
     // Unselected color is a light lavender purple constant
-    final Color unselectedColor = const Color(0xFFB8B0D4);
     
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),

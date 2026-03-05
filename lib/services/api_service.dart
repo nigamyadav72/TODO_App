@@ -97,7 +97,7 @@ class ApiService {
     }
   }
 
-  static Future<bool> createTask(Task task) async {
+  static Future<Task?> createTask(Task task) async {
     try {
       final token = await getToken();
       final response = await http.post(
@@ -109,9 +109,12 @@ class ApiService {
         body: jsonEncode(task.toJson()),
       );
 
-      return response.statusCode == 201;
+      if (response.statusCode == 201) {
+        return Task.fromJson(jsonDecode(response.body));
+      }
+      return null;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 

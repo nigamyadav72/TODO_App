@@ -5,6 +5,8 @@ import '../../core/constants/colors.dart';
 import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
 import '../../models/task.dart';
+import '../notifications/notifications_screen.dart';
+import '../../services/notification_service.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -54,7 +56,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       category: _selectedGroup,
     );
 
-    final success = await Provider.of<TaskProvider>(
+    final taskResult = await Provider.of<TaskProvider>(
       context,
       listen: false,
     ).addTask(newTask);
@@ -63,7 +65,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
     if (!mounted) return;
 
-    if (success) {
+    if (taskResult != null) {
+      // Schedule notification
+      NotificationService().scheduleTaskNotification(
+        id: taskResult.id.hashCode,
+        title: 'Task Reminder',
+        body: 'Your project "${taskResult.title}" is due now!',
+        scheduledTime: taskResult.startTime,
+      );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Project added successfully!')),
       );
@@ -93,7 +103,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         actions: [
           IconButton(
             icon: const Icon(IconsaxPlusBold.notification, size: 24),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+              );
+            },
           ),
         ],
       ),
