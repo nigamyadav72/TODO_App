@@ -75,6 +75,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         scheduledTime: taskResult.startTime,
       );
 
+      // Add to Notification Center UI
+      if (mounted) {
+        Provider.of<NotificationProvider>(context, listen: false).addNotification(
+          title: 'Project Created',
+          body: 'You have scheduled "${taskResult.title}" for reminder.',
+          icon: IconsaxPlusBold.add_circle,
+          color: AppColors.primary,
+        );
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Project added successfully!')),
       );
