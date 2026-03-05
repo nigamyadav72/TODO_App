@@ -8,6 +8,7 @@ import '../../widgets/decorative_background.dart';
 import '../../services/task_provider.dart';
 import '../notifications/notifications_screen.dart';
 import '../../services/notification_service.dart';
+import '../../services/notification_provider.dart';
 
 class TaskListScreen extends StatefulWidget {
   final bool isNested;
@@ -88,25 +89,48 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     ),
                   ),
                 ),
-                // Dark notification bell
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-                      );
-                    },
-                    child: const Icon(
-                      IconsaxPlusBold.notification,
-                      size: 20,
-                      color: AppColors.textPrimary,
-                    ),
+                Consumer<NotificationProvider>(
+                  builder: (context, notificationProvider, _) => Stack(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NotificationsScreen(),
+                              ),
+                            );
+                          },
+                          child: const Icon(
+                            IconsaxPlusBold.notification,
+                            size: 20,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (notificationProvider.hasUnread)
+                        Positioned(
+                          right: 2,
+                          top: 2,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: AppColors.error,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 8,
+                              minHeight: 8,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -139,14 +163,39 @@ class _TaskListScreenState extends State<TaskListScreen> {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(IconsaxPlusBold.notification, size: 24),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-              );
-            },
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, _) => Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(IconsaxPlusBold.notification, size: 24),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                if (notificationProvider.hasUnread)
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: AppColors.error,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 8,
+                        minHeight: 8,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

@@ -7,6 +7,7 @@ import '../../services/task_provider.dart';
 import '../../models/task.dart';
 import '../notifications/notifications_screen.dart';
 import '../../services/notification_service.dart';
+import '../../services/notification_provider.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -101,14 +102,39 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(IconsaxPlusBold.notification, size: 24),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-              );
-            },
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, _) => Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(IconsaxPlusBold.notification, size: 24),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                if (notificationProvider.hasUnread)
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: AppColors.error,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 8,
+                        minHeight: 8,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

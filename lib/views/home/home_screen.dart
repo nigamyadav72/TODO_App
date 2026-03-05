@@ -11,6 +11,7 @@ import '../tasks/add_task_screen.dart';
 import '../projects/projects_screen.dart';
 import '../profile/profile_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../../services/notification_provider.dart';
 import '../../models/task.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -150,41 +151,46 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const Spacer(),
-        Stack(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-                  );
-                },
-                child: const Icon(
-                  IconsaxPlusBold.notification,
-                  size: 24,
-                  color: AppColors.textPrimary,
+        Consumer<NotificationProvider>(
+          builder: (context, notificationProvider, _) => Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen(),
+                      ),
+                    );
+                  },
+                  child: const Icon(
+                    IconsaxPlusBold.notification,
+                    size: 24,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              right: 6,
-              top: 6,
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
-                  color: AppColors.error,
-                  shape: BoxShape.circle,
+              if (notificationProvider.hasUnread)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: AppColors.error,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
+                  ),
                 ),
-                constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
