@@ -28,23 +28,23 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    bool success = await authProvider.login(
+    final result = await authProvider.login(
       _emailController.text,
       _passwordController.text,
     );
 
     setState(() => _isLoading = false);
 
-    if (success) {
-      // We don't need to pop or navigate. 
-      // AuthProvider will notifyListeners, AuthWrapper will rebuild and swap the root to HomeScreen.
+    if (result['success'] == true) {
       debugPrint('Login success, waiting for AuthWrapper rebuild');
     } else {
       if (!mounted) return;
+      final errorMsg = result['error'] ?? 'Login failed. Please check credentials.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login failed. Please check credentials.'),
+        SnackBar(
+          content: Text(errorMsg),
           backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 4),
         ),
       );
     }

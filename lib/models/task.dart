@@ -39,7 +39,8 @@ class Task {
       'start_time': startTime.toUtc().toIso8601String(),
       'end_time': endTime.toUtc().toIso8601String(),
       'status': status,
-      'group': groupId,
+      // Send null if groupId is empty — the backend expects a valid integer PK or null
+      'group': groupId.isNotEmpty ? int.tryParse(groupId) : null,
       'category': category,
     };
   }

@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    bool success = await authProvider.register(
+    final result = await authProvider.register(
       _usernameController.text,
       _emailController.text,
       _passwordController.text,
@@ -38,15 +38,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = false);
 
-    if (success) {
+    if (result['success'] == true) {
       debugPrint('Signup success');
       // No Navigator.pop() needed
     } else {
       if (!mounted) return;
+      final errorMsg = result['error'] ?? 'Registration failed.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration failed. Email might already exist.'),
+        SnackBar(
+          content: Text(errorMsg),
           backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 4),
         ),
       );
     }

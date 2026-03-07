@@ -53,11 +53,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       startTime: startDateTime,
       endTime: endDateTime,
       status: 'To-do',
-      groupId: '1',
+      groupId: '',  // Send empty so toJson sends null — no group assigned
       category: _selectedGroup,
     );
 
-    final taskResult = await Provider.of<TaskProvider>(
+    final result = await Provider.of<TaskProvider>(
       context,
       listen: false,
     ).addTask(newTask);
@@ -66,7 +66,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
     if (!mounted) return;
 
-    if (taskResult != null) {
+    if (result['success'] == true) {
+      final taskResult = result['task'] as Task;
+
       // Schedule notification
       NotificationService().scheduleTaskNotification(
         id: taskResult.id.hashCode,
@@ -90,9 +92,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       );
       Navigator.pop(context);
     } else {
+      final errorMsg = result['error'] ?? 'Failed to add project. Please try again.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to add project. Please try again.'),
+        SnackBar(
+          content: Text(errorMsg),
+          duration: const Duration(seconds: 4),
         ),
       );
     }
