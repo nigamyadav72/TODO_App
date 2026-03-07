@@ -5,9 +5,11 @@ import '../services/api_service.dart';
 class TaskProvider with ChangeNotifier {
   List<Task> _tasks = [];
   bool _isLoading = false;
+  String? _error;
 
   List<Task> get tasks => _tasks;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
   // --- Computed stats for dashboard ---
 
@@ -52,8 +54,14 @@ class TaskProvider with ChangeNotifier {
   int get todayCompletedCount => todayTasks.where((t) => t.status == 'Done').length;
   double get todayProgress => todayTasksCount == 0 ? 0 : todayCompletedCount / todayTasksCount;
 
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
   Future<void> fetchTasks() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     
     final token = await ApiService.getToken();
@@ -65,7 +73,11 @@ class TaskProvider with ChangeNotifier {
 
     try {
       _tasks = await ApiService.getTasks();
+    } on ApiException catch (e) {
+      _error = e.message;
+      debugPrint('Error fetching tasks: $e');
     } catch (e) {
+      _error = 'Failed to load tasks. Pull down to retry.';
       debugPrint('Error fetching tasks: $e');
     } finally {
       _isLoading = false;
@@ -73,12 +85,13 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<Task?> addTask(Task task) async {
-    final newTask = await ApiService.createTask(task);
-    if (newTask != null) {
+  Future<Map<String, dynamic>> addTask(Task task) async {
+    final result = await ApiService.createTask(task);
+    if (result['success'] == true) {
       await fetchTasks();
+      return result;
     }
-    return newTask;
+    return result;
   }
 
   Future<bool> deleteTask(String id) async {
