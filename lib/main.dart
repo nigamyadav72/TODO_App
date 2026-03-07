@@ -14,7 +14,26 @@ import 'services/notification_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService().init();
+  
+  // Set error builder to catch and display rendering errors
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          child: SelectableText(
+            'Error: ${details.exception}\n\nStack trace:\n${details.stack}',
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+  };
+
+  try {
+    await NotificationService().init();
+  } catch (e) {
+    debugPrint('Notification initialization failed: $e');
+  }
   
   runApp(
     MultiProvider(
